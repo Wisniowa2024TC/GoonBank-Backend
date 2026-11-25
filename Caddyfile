@@ -1,11 +1,18 @@
 {
-    # Disable port 80 HTTP-to-HTTPS redirect since port 80 is taken
+    # Port 80 is used by another service on this server, so don't redirect HTTP -> HTTPS
     auto_https disable_redirects
+
+    # Clients that connect by IP address (e.g. the phone using https://192.168.0.10) send no
+    # SNI, so Caddy has to be told which certificate to use for them. Without this the TLS
+    # handshake fails with "tlsv1 alert internal error".
+    default_sni {$GOONBANK_HOST:localhost}
 }
 
-# Listen on port 443 for any incoming host/IP (e.g. https://localhost or https://<school-ip>)
-:443 {
-    # Generate an internal self-signed TLS certificate (no domain or Let's Encrypt required)
+# Caddy only issues certificates for the hosts/IPs listed in the site address; a bare ":443"
+# gets none, so every handshake failed. GOONBANK_HOST is the address clients use (see .env).
+https://{$GOONBANK_HOST:localhost}, https://localhost {
+    # Self-signed certificate from Caddy's internal CA. Clients have to trust its root, export it with:
+    #   docker compose exec caddy cat /data/caddy/pki/authorities/local/root.crt
     tls internal
 
     reverse_proxy goonbank-api:8000

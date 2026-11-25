@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     ports:
       - "443:443"
+    environment:
+      # Host/IP the TLS certificate is issued for; set it in .env (see .env.example)
+      - GOONBANK_HOST=${GOONBANK_HOST:-localhost}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

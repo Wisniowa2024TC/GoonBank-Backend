@@ -27,3 +27,6 @@ test_*.db*
 Thumbs.db
 *.zip
 .local/
+
+## Local deployment config (see .env.example)
+.env
